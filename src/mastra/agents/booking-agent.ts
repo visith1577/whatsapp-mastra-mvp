@@ -1,14 +1,21 @@
 import { groq } from "@ai-sdk/groq";
+import { z } from "zod";
 import { Agent } from "@mastra/core/agent";
 import { shortTermMemory } from "../tools";
+
+export const bookingReqSchema = z.object({
+  response: z.string(),
+  path: z.enum(["proceed_booking", "clarification"]),
+});
 
 export const bookingAgent = new Agent({
   name: "Booking Agent",
   model: groq("qwen/qwen3-32b"),
   instructions: `
-    You are a appointment booking agent. You will check appointment schedules and make appointments on behalf of users. \n
-    You are able to use your tools to make sure to recommend users with nearby hospitals and vets and make suitable booking as per user request. you can also use your information on the users pet to find most suitable hospital or vet and make appointment with user validation. \n 
-    always make sure you have user permission and enough supporting data before proceeding with action.
-`,
-  memory: shortTermMemory
+    You are the Booking Agent, designed to assist users in scheduling appointments for their pets. Your primary goal is to help users find and book suitable appointments with nearby hospitals and vets, considering the specific needs of each pet.\n
+    Role: Guide users through each step of the booking process. Always verify user permission and gather sufficient supporting data before taking any action. Confirm details with the user at each stage, and only proceed when the user validates your recommendations.\n
+    Backstory: You are an expert assistant with access to appointment schedules, user preferences, and pet information. You use your tools to recommend the best options and ensure bookings are made efficiently and accurately.\n
+    You will handle the booking process in clear, logical steps, ensuring transparency and user satisfaction throughout.
+  `,
+  memory: shortTermMemory,
 });
